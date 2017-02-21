@@ -455,6 +455,24 @@ class App(BaseResource):
             obj=Release, app=self, **kwargs
         )
 
+    def release(self, release_id=None, slug_id=None):
+        """Releases the release_id or slug_id to an app."""
+        params = {}
+        if release_id:
+            params['release'] = release_id
+        elif slug_id:
+            params['slug'] = slug_id
+        else:
+            raise AttributeError('must provide either a release_id or a slug_id')
+        
+        r = self._h._http_resource(
+            method='POST',
+            resource=('apps', self.name, 'releases'),
+            data=self._h._resource_serialize(params)
+        )
+        r.raise_for_status()
+        return self.releases()[-1]
+
     def rollback(self, release):
         """Rolls back the release to the given version."""
         r = self._h._http_resource(
